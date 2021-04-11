@@ -5,8 +5,10 @@
 #include <vector>
 #include <fstream>
 #include <thread>
+#include <cassert>
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 
 using namespace std;
 
@@ -35,6 +37,13 @@ void playFrames(vector<vector<string>> &frames){
   sf::RenderWindow window(sf::VideoMode(frames[0][0].size()*WINSIZE,frames[0].size()*WINSIZE*2),"BadApple");
   window.setFramerateLimit(30);
 
+  sf::Music music;
+  if(not music.openFromFile("BadApple.ogg"))
+    return;
+
+  music.play();
+
+
   int framecnt=0;
 
   while(window.isOpen()){
@@ -45,11 +54,13 @@ void playFrames(vector<vector<string>> &frames){
     }
     window.clear();
 
+
     string buf = "\e[0;0H";
     for(auto &line:frames[framecnt]){
       buf += line;
       buf += "\n";
     }
+    cout<<buf<<flush;
 
     for(int h=0;h<frames[0].size();h++){
       for(int w=0;w<frames[0][0].size();w++){
@@ -57,16 +68,13 @@ void playFrames(vector<vector<string>> &frames){
         rect.setPosition(w*WINSIZE,h*WINSIZE*2);
         for(int i=0;i<ASCIIS.size();i++){
           if(ASCIIS[i] == frames[framecnt][h][w]){
-            int color = (i/11.0 * 255);
+            int color = 255 - (i/11.0 * 255);
             rect.setFillColor(sf::Color(color,color,color));
           }
         }
         window.draw(rect);
       }
     }
-
-
-    cout<<buf;
 
     framecnt++;
 
